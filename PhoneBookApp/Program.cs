@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
 
 
 namespace PhoneBookApp
@@ -12,10 +11,11 @@ namespace PhoneBookApp
 
         static void Main(string[] args)
         {
-            var ContactsAndCalls = new Dictionary<Contact, List<string>>();
+            var ContactsAndCalls = new Dictionary<Contact, List<OutgoingCall>>();
             do
             {
-                int input = int.Parse(Console.ReadLine());
+                
+                int input = MenuInput();
                 MenuAction(input, ContactsAndCalls);
             } while (inMenu);
         }
@@ -45,9 +45,9 @@ namespace PhoneBookApp
             public string CallStatus { get; set; }
 
         }
-        private static void MenuAction(int input, IDictionary<Contact, List<string>> ContactsAndCalls)
+        private static void MenuAction(int input, IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
         {
-            
+           
                 switch (input)
                 {
                     case 0:
@@ -65,7 +65,10 @@ namespace PhoneBookApp
                     case 4:
                         Prefferences(ContactsAndCalls);
                         break;
-                    default:
+                    case 5:
+                    var newInput = MenuInputSub();
+                    break;
+                default:
                         Console.WriteLine("Krivo upisan podatak");
                         break;
 
@@ -105,7 +108,7 @@ namespace PhoneBookApp
             
 
         }
-        private static void DisplayData(IDictionary<Contact, List<string>> ContactsAndCalls)
+        private static void DisplayData(IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
         {
             var newContact = new Contact();
             int ContactNo=1;
@@ -117,12 +120,13 @@ namespace PhoneBookApp
             Pause();
             Console.Clear();
         }
-        private static void AddNewContact(IDictionary<Contact, List<string>> ContactsAndCalls)
+        private static void AddNewContact(IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
         {
             var newContact =new Contact();
 
-            NameSurname(newContact.NameAndSurname);
-            PhoneNumber(newContact.PhoneNumber);
+            newContact.NameAndSurname = NameSurname(newContact.NameAndSurname);
+            newContact.PhoneNumber = PhoneNumber(newContact.PhoneNumber);
+            newContact.Prefference = PrefferenceType(newContact.Prefference);
             ContactsAndCalls.Add(newContact, null);
             Console.Clear();
 
@@ -131,7 +135,7 @@ namespace PhoneBookApp
         {
             Task.Delay(3000).Wait();
         }
-        private static void PrefferenceType(string type)
+        private static string PrefferenceType(string type)
         {
             Console.WriteLine("Unesi preferencu kontakta, može biti: favorit, normalan ili blokiran");
             type = Console.ReadLine();
@@ -140,8 +144,9 @@ namespace PhoneBookApp
                 Console.WriteLine("neispravan unos pokušajte ponovno");
                 type = Console.ReadLine();
             }
+            return type;
         }
-        private static void PhoneNumber(string number)
+        public static string PhoneNumber(string number)
         {
             Console.WriteLine("Unesi broj telefona: ");
             number = Console.ReadLine();
@@ -150,8 +155,9 @@ namespace PhoneBookApp
                 Console.WriteLine("Neispravan unos, pokušajte ponovno");
                 number = Console.ReadLine();
             }
+            return number;
         }
-        private static void NameSurname(string name)
+        public static string NameSurname(string name)
         {
             Console.WriteLine("Unesi ime i Prezime: ");
             name = Console.ReadLine();
@@ -160,41 +166,92 @@ namespace PhoneBookApp
                 Console.WriteLine("Neispravan unos, pokušajte ponovno");
                 name = Console.ReadLine();
             }
+            return name;
         }
-        private static void DeleteContact(IDictionary<Contact, List<string>> ContactsAndCalls)
+        private static void DeleteContact(IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
         {
             var newContact = new Contact();
-            NameSurname(newContact.NameAndSurname);
-            PhoneNumber(newContact.PhoneNumber);
-            while (!ContactsAndCalls.ContainsKey(newContact))
+            newContact.NameAndSurname = NameSurname(newContact.NameAndSurname);
+            newContact.PhoneNumber = PhoneNumber(newContact.PhoneNumber);
+            foreach(var item in ContactsAndCalls)
             {
-                Console.WriteLine("toga kontakta nema u imeniku, unesi ponovno: ");
-                NameSurname(newContact.NameAndSurname);
-                PhoneNumber(newContact.PhoneNumber);
-            }
-            ContactsAndCalls.Remove(newContact);
-        }
-        private static void Prefferences(IDictionary<Contact, List<string>> ContactsAndCalls)
-        {
-            var newContact = new Contact();
-            NameSurname(newContact.NameAndSurname);
-            PhoneNumber(newContact.PhoneNumber);
-            while (!ContactsAndCalls.ContainsKey(newContact))
-            {
-                Console.WriteLine("toga kontakta nema u imeniku, unesi ponovno: ");
-                NameSurname(newContact.NameAndSurname);
-                PhoneNumber(newContact.PhoneNumber);
-            }
-            PrefferenceType(newContact.Prefference);
-            foreach (Contact item in ContactsAndCalls.Keys)
-            {
-                if (item.NameAndSurname == newContact.NameAndSurname && item.PhoneNumber == newContact.PhoneNumber)
+                if (item.Key.PhoneNumber != newContact.PhoneNumber || item.Key.NameAndSurname != newContact.NameAndSurname)
                 {
-                    item.Prefference = newContact.Prefference;
-                }
-                break;
+                    Console.WriteLine("toga kontakta nema u imeniku, unesi ponovno: ");
+                    newContact.NameAndSurname = NameSurname(newContact.NameAndSurname);
+                    newContact.PhoneNumber = PhoneNumber(newContact.PhoneNumber);
+                    continue;
+                } 
+                ContactsAndCalls.Remove(item);
             }
-            
+            Console.Clear();
+        }
+        private static void Prefferences(IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
+        {
+            var newContact = new Contact();
+            newContact.NameAndSurname= NameSurname(newContact.NameAndSurname);
+            newContact.PhoneNumber = PhoneNumber(newContact.PhoneNumber);
+            foreach(var item in ContactsAndCalls)
+            {
+                if (item.Key.PhoneNumber != newContact.PhoneNumber || item.Key.NameAndSurname != newContact.NameAndSurname)
+                {
+                    Console.WriteLine("toga kontakta nema u imeniku, unesi ponovno: ");
+                    newContact.NameAndSurname = NameSurname(newContact.NameAndSurname);
+                    newContact.PhoneNumber = PhoneNumber(newContact.PhoneNumber);
+                    continue;
+                }
+                ContactsAndCalls.Remove(item); 
+            }
+            Console.WriteLine("unesi novi prefference za ovaj kontakt");
+            newContact.Prefference = PrefferenceType(newContact.Prefference);
+            ContactsAndCalls.Add(newContact, null);
+
+        }
+        public static int MenuInput()
+        {
+            var isInputed = false;
+            var menuInput = 0;
+
+
+            while (!isInputed)
+            {
+                Console.Clear();
+                Console.WriteLine(MainMenu());
+
+                isInputed = int.TryParse(Console.ReadLine(), out menuInput);
+                if (isInputed)
+                {
+                    break;
+                }
+
+                Console.WriteLine("Nesipravan unos, pokušajte ponovno");
+                Pause();
+            }
+
+            return menuInput;
+        }
+        public static int MenuInputSub()
+        {
+            var isInputed = false;
+            var menuInput = 0;
+
+
+            while (!isInputed)
+            {
+                Console.Clear();
+                Console.WriteLine(SubMenu());
+
+                isInputed = int.TryParse(Console.ReadLine(), out menuInput);
+                if (isInputed)
+                {
+                    break;
+                }
+
+                Console.WriteLine("Nesipravan unos, pokušajte ponovno");
+                Pause();
+            }
+
+            return menuInput;
         }
     }
     
