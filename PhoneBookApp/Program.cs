@@ -43,6 +43,10 @@ namespace PhoneBookApp
         {
             public DateTime CallSetupTime { get; set; }
             public string CallStatus { get; set; }
+            public OutgoingCall()
+            {
+
+            }
 
         }
         private static void MenuAction(int input, IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
@@ -67,6 +71,8 @@ namespace PhoneBookApp
                         break;
                     case 5:
                     var newInput = MenuInputSub();
+                    SubMenuAction(newInput, ContactsAndCalls);
+
                     break;
                 default:
                         Console.WriteLine("Krivo upisan podatak");
@@ -75,6 +81,19 @@ namespace PhoneBookApp
                 }
             
             
+        }
+        private static void SubMenuAction(int input, IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
+        {
+            switch (input)
+            {
+                case 0:
+                    inMenu = !inMenu;
+                    break;
+                case 1:
+                    NewCall(ContactsAndCalls);
+                    break;
+    
+            }
         }
         private static string MainMenu()
         {
@@ -252,6 +271,48 @@ namespace PhoneBookApp
             }
 
             return menuInput;
+        }
+        private static void NewCall(IDictionary<Contact, List<OutgoingCall>> ContactsAndCalls)
+        {
+            Console.WriteLine("Upišite broj osobe koje želite nazvati");
+            var ContactNum = Console.ReadLine();
+            
+            foreach(var item in ContactsAndCalls.Keys)
+            {
+                if(item.PhoneNumber == ContactNum)
+                {
+                    var num = new Random();
+                    var ranNum = num.Next(0,3);
+                    
+                    if(ranNum == 1)
+                    {
+                        var newCall = new OutgoingCall();
+                        newCall.CallSetupTime = DateTime.Now;
+                        newCall.CallStatus = "Zavrsen";
+
+                        Console.WriteLine("Razgovor je zavrsio");
+                        
+                        ContactsAndCalls[item].Add(newCall);
+                    }
+                    else if(ranNum == 2)
+                    {
+                        Console.WriteLine("Nazalost osoba nije mogla odgovoriti na poziv");
+                        var newCallMissed = new OutgoingCall();
+                        newCallMissed.CallSetupTime = DateTime.Now;
+                        newCallMissed.CallStatus = "Propušten";
+
+                        ContactsAndCalls[item].Add(newCallMissed);
+                    }
+                    else if(ranNum == 3)
+                    {
+                        Console.WriteLine("Poziv uspostavljen");
+                        
+                        
+
+                    }
+                    else { Console.WriteLine("Poziv nije moguće uspostaviti"); }
+                }
+            }
         }
     }
     
